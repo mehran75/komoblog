@@ -67,7 +67,7 @@ class comments extends Controller
 
             $comment->saveOrFail();
             return Response(['status' => 'Success',
-                'message' =>  "your comment just posted!",
+                'message' => "your comment just posted!",
                 'data' => $comment
             ]);
 
@@ -82,5 +82,41 @@ class comments extends Controller
         }
 
     }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($psot_id, $id)
+    {
+        try {
+
+            $author = auth('api')->user();
+
+            $post = Post::findOrFail($id);
+
+            if (!$post->is_published && ($author == null || $author->id != $post->author_id)) {
+                return Response([
+                    'status' => 'Failed',
+                    'message' => "You can't reach this post!"
+                ], 403);
+            }
+
+            $post->categories;
+            $post->comments;
+            $post->labels;
+            return Response([
+                'status' => 'Success',
+                'data' => $post
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return Response(['status' => 'Failed',
+                'message' => 'Model not found',
+                'debug' => $e]);
+        }
+    }
+
 
 }
