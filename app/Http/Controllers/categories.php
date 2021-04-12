@@ -52,13 +52,6 @@ class categories extends Controller
                 'debug' => $e]);
         }
 
-//        catch (Exception $e) {
-//            return Response(['status' => 'Failed',
-//                'message' => 'Oh Boy! You made such a mistake that even I couldn\'t figure it out!!
-//                 go to your room and think about it',
-//                'debug' => $e]);
-//        }
-
     }
 
     /**

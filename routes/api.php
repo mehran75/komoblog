@@ -35,3 +35,4 @@ Route::middleware('auth:api')->apiResource('users', 'users');
 Route::middleware('auth:api')->apiResource('categories', 'categories');
 Route::apiResource('posts', 'posts');
 Route::apiResource('posts.comments', 'comments')->shallow();
+Route::apiResource('labels', 'labels');
