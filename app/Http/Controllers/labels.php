@@ -3,15 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LabelRequest;
-use App\Model\Category;
 use App\Model\Label;
-use App\Model\PostCategory;
 use App\Model\PostLabel;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Nyholm\Psr7\Response;
 
 class labels extends Controller
 {
