@@ -37,7 +37,7 @@ class posts extends Controller
                 ->with('labels')
                 ->where('is_published', true);
             if ($author != null) {
-                $posts->orWhere('author_id', $author->id);
+                $posts = $posts->orWhere('author_id', $author->id);
             }
 
             return Response([
@@ -229,8 +229,8 @@ class posts extends Controller
         try {
             DB::beginTransaction();
 
-            echo Post::findOrFail($id)->delete();
-            echo DB::table('post_categories')->where('post_id', $id)->delete();
+            Post::findOrFail($id)->delete();
+            DB::table('post_categories')->where('post_id', $id)->delete();
 
             DB::commit();
             return Response([

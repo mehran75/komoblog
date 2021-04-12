@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CommentRequest;
+use App\Http\Requests\PostRequest;
 use App\Model\Category;
 use App\Model\Comment;
 use App\Model\Post;
 use App\Model\PostCategory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Mockery\Exception;
 
 class comments extends Controller
@@ -26,18 +29,40 @@ class comments extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param $post_id
+     * @param $is_published
      * @return \Illuminate\Http\Response
      */
     public function index($post_id)
     {
-//        $author = auth('api')->user();
+        $author = auth('api')->user();
 
         try {
-            $comments = Comment::where('post_id', $post_id)->paginate(10);
+            if ($author == null) {
+                $post = Post::findOrFail($post_id);
+
+                if (!$post->is_published) {
+
+                    return Response([
+                        'status' => 'Failed',
+                        'message' => "You can't reach this post!"
+                    ], 403);
+
+                }
+            }
+            $comments = DB::table('comments')
+                ->select('comments.*')
+                ->join('posts', 'posts.id', '=', 'comments.post_id')
+                ->where('post_id', $post_id)
+                ->where('posts.is_published', true);
+
+            if ($author != null) {
+                $comments = $comments->orWhere('posts.author_id', $author);
+            }
 
             return Response([
                 'status' => 'Success',
-                'data' => $comments
+                'data' => $comments->paginate(10)
             ]);
         } catch (Exception $e) {
             return Response([
@@ -60,6 +85,15 @@ class comments extends Controller
         $request = $request->validated();
         try {
 
+            $post = Post::findOrFail($request['post_id']);
+
+            if (!$post->is_published) {
+                return Response([
+                    'status' => 'Failed',
+                    'message' => "You can't reach this post!"
+                ], 403);
+            }
+
             $comment = new Comment;
             $comment->body = $request['body'];
             $comment->author_id = Auth::id();
@@ -73,7 +107,7 @@ class comments extends Controller
 
         } catch (QueryException $e) {
             return Response(['status' => 'Failed',
-                'message' => 'failed to draft your requested post',
+                'message' => 'failed to draft your requested comment',
                 'debug' => $e]);
         } catch (ModelNotFoundException $e) {
             return Response(['status' => 'Failed',
@@ -118,5 +152,86 @@ class comments extends Controller
         }
     }
 
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+            $request = $request->validate([
+                'body' => 'required|max:3000'
+            ]);
+
+            $comment = Comment::findOrFail($id);
+
+            $post = Post::findOrFail($comment->post_id);
+
+            if (!$post->is_published) {
+                return Response([
+                    'status' => 'Failed',
+                    'message' => "You can't reach this post!"
+                ], 403);
+            }
+
+            $comment->body = $request['body'];
+
+            $comment->saveOrFail();
+            return Response(['status' => 'Success',
+                'message' => "your comment just updated!",
+                'data' => $comment
+            ]);
+
+        } catch (QueryException $e) {
+            return Response(['status' => 'Failed',
+                'message' => 'failed to draft your requested comment',
+                'debug' => $e], 500);
+        } catch (ModelNotFoundException $e) {
+            return Response(['status' => 'Failed',
+                'message' => 'Model not found',
+                'debug' => $e]);
+        } catch (ValidationException $e) {
+            return Response([
+                'status' => 'Failed',
+                'data' => ['body' => 'A body is required']
+            ]);
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        // there should be a soft delete option though!
+        try {
+            $comment = Comment::findOrFail($id);
+            $comment->post();
+
+            if (!$comment->post->is_published) {
+                return Response([
+                    'status' => 'Failed',
+                    'message' => "You can't reach this post!"
+                ], 403);
+            }
+
+            $comment->delete();
+            return Response([
+                'status' => 'Success'
+            ]);
+        } catch (\Throwable $e) {
+            return Response([
+                'status' => 'Failed',
+                'message' => 'Failed to remove the comment',
+                'debug' => $e
+            ]);
+        }
+    }
 
 }
