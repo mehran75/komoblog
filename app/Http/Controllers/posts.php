@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PostRequest;
 use App\Model\Category;
+use App\Model\Label;
 use App\Model\Post;
 use App\Model\PostCategory;
+use App\Model\PostLabel;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Response;
@@ -76,6 +78,7 @@ class posts extends Controller
 
             if ($post->save()) {
 
+//                assigning categories
                 $cats = Category::findOrFail($request['category_ids']);
                 $data = array();
 
@@ -88,7 +91,24 @@ class posts extends Controller
 
                 PostCategory::insert($data);
 
+//                assigning labels
+                $labels = Label::findOrFail($request['label_ids']);
+                $data = array();
+
+                foreach ($labels as $label) {
+                    array_push($data, array(
+                        'post_id' => $post->id,
+                        'label_id' => $label->id
+                    ));
+                }
+
+                PostLabel::insert($data);
+
                 DB::commit();
+
+                $post->categories;
+                $post->labels;
+                $post->comments;
 
                 return Response(['status' => 'Success',
                     'message' => $request['title'] . " is now a new post!",
@@ -173,10 +193,15 @@ class posts extends Controller
             $post->photo = $request['image_id'];
 
             if ($post->save()) {
-                DB::table('post_categories')
-                    ->where('post_id', $post->id)
-                    ->whereIn('category_id', $request['category_ids'])->delete();
 
+//                deleting previous assignments
+                DB::table('post_categories')
+                    ->where('post_id', $post->id)->delete();
+
+                echo DB::table('post_labels')
+                    ->where('post_id', $post->id)->delete();
+
+//                assigning categories
                 $cats = Category::findOrFail($request['category_ids']);
                 $data = array();
 
@@ -189,9 +214,26 @@ class posts extends Controller
 
                 PostCategory::insert($data);
 
+//                assigning labels
+                $labels = Label::findOrFail($request['label_ids']);
+                $data = array();
+
+                foreach ($labels as $label) {
+                    array_push($data, array(
+                        'post_id' => $post->id,
+                        'label_id' => $label->id
+                    ));
+                }
+
+                PostLabel::insert($data);
+
+
                 DB::commit();
 
                 $post->categories;
+                $post->commnets;
+                $post->labels;
+
                 return Response(['status' => 'Success',
                     'message' => $request['title'] . " is now a new post!",
                     'data' => $post
@@ -231,6 +273,7 @@ class posts extends Controller
 
             Post::findOrFail($id)->delete();
             DB::table('post_categories')->where('post_id', $id)->delete();
+            DB::table('post_labels')->where('post_id', $id)->delete();
 
             DB::commit();
             return Response([
