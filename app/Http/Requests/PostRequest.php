@@ -35,7 +35,7 @@ class PostRequest extends FormRequest
             'excerpt' => 'required',
             'is_published' => 'required|bool',
             'category_ids' => 'required|array|min:1',
-            'label_ids' => 'required|array|min:1',
+            'label_ids' => 'max:5',
             'image_id' => 'required',
         ];
 

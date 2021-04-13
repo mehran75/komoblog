@@ -198,7 +198,7 @@ class posts extends Controller
                 DB::table('post_categories')
                     ->where('post_id', $post->id)->delete();
 
-                echo DB::table('post_labels')
+                DB::table('post_labels')
                     ->where('post_id', $post->id)->delete();
 
 //                assigning categories
@@ -215,18 +215,19 @@ class posts extends Controller
                 PostCategory::insert($data);
 
 //                assigning labels
-                $labels = Label::findOrFail($request['label_ids']);
-                $data = array();
+                if ($request['label_ids'] != null) {
+                    $labels = Label::findOrFail($request['label_ids']);
+                    $data = array();
 
-                foreach ($labels as $label) {
-                    array_push($data, array(
-                        'post_id' => $post->id,
-                        'label_id' => $label->id
-                    ));
+                    foreach ($labels as $label) {
+                        array_push($data, array(
+                            'post_id' => $post->id,
+                            'label_id' => $label->id
+                        ));
+                    }
+
+                    PostLabel::insert($data);
                 }
-
-                PostLabel::insert($data);
-
 
                 DB::commit();
 
@@ -240,8 +241,10 @@ class posts extends Controller
                 ]);
             } else {
                 DB::rollBack();
-                return Response(['status' => 'Failed',
-                    'message' => "Something went wrong here!"], 500);
+                return Response([
+                    'status' => 'Failed',
+                    'message' => "Something went wrong here!"
+                ], 500);
             }
         } catch (QueryException $e) {
             DB::rollBack();
