@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\StrongPassword;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -29,7 +30,7 @@ class UserRequest extends FormRequest
         return [
             'name' => 'required',
             'email' => ['required', 'email'],
-            'password' => 'required|min:8'
+            'password' => ['required', new StrongPassword]
         ];
     }
 
