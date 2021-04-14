@@ -17,7 +17,7 @@ class CategorySeeder extends Seeder
 
         for ($i = 0; $i < 10; $i++) {
             array_push($data, [
-                'name' => Str::random(6)
+                'name' => strtr(Str::random(7), '0123456789', str_repeat('B', 10)),
             ]);
         }
 
