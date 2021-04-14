@@ -92,17 +92,19 @@ class posts extends Controller
                 PostCategory::insert($data);
 
 //                assigning labels
-                $labels = Label::findOrFail($request['label_ids']);
-                $data = array();
+                if ($request['label_ids'] != null) {
+                    $labels = Label::findOrFail($request['label_ids']);
+                    $data = array();
 
-                foreach ($labels as $label) {
-                    array_push($data, array(
-                        'post_id' => $post->id,
-                        'label_id' => $label->id
-                    ));
+                    foreach ($labels as $label) {
+                        array_push($data, array(
+                            'post_id' => $post->id,
+                            'label_id' => $label->id
+                        ));
+                    }
+
+                    PostLabel::insert($data);
                 }
-
-                PostLabel::insert($data);
 
                 DB::commit();
 
