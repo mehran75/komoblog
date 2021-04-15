@@ -13,16 +13,16 @@ class CommentSeeder extends Seeder
      */
     public function run()
     {
-        $data = [];
-
-        for ($i = 0; $i < 20; $i++) {
-            array_push($data, [
-                'body' => Str::random(random_int(10, 100)),
-                'author_id' => random_int(1,10),
-                'post_id' => random_int(1,10)
-            ]);
-        }
-
-        DB::table('comments')->insert($data);
+//        $data = [];
+//
+//        for ($i = 0; $i < 20; $i++) {
+//            array_push($data, [
+//                'body' => Str::random(random_int(10, 100)),
+//                'author_id' => random_int(1,10),
+//                'post_id' => random_int(1,10)
+//            ]);
+//        }
+//
+//        DB::table('comments')->insert($data);
     }
 }

@@ -34,9 +34,9 @@ class PostRequest extends FormRequest
             'body' => 'required|min:250',
             'excerpt' => 'required',
             'is_published' => 'required|bool',
-            'category_ids' => 'required|array|min:1',
+            'category_ids' => 'required|array|min:1|max:3',
             'label_ids' => 'max:5',
-            'image_id' => 'required',
+            'photo' => 'required',
         ];
 
     }

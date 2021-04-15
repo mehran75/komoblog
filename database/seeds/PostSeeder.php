@@ -15,11 +15,21 @@ class PostSeeder extends Seeder
     {
         $data = [];
 
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             array_push($data, [
                 'title' => Str::random(6),
                 'body' => Str::random(1000),
-                'author_id' => random_int(1, 10),
+                'author_id' => 2,
+                'excerpt' => Str::random(100),
+                'is_published' => (bool)rand(0, 1),
+                'photo' => Str::random(20),
+            ]);
+        }
+        for ($i = 0; $i < 5; $i++) {
+            array_push($data, [
+                'title' => Str::random(6),
+                'body' => Str::random(1000),
+                'author_id' => 3,
                 'excerpt' => Str::random(100),
                 'is_published' => (bool)rand(0, 1),
                 'photo' => Str::random(20),
@@ -33,17 +43,17 @@ class PostSeeder extends Seeder
         for ($i = 0; $i < 10; $i++) {
             array_push($data, [
                 'post_id' => $i+1,
-                'category_id' => random_int(1, 10),
+                'category_id' => 2,
             ]);
         }
 
         DB::table('post_categories')->insert($data);
 
         $data = [];
-        for ($i = 0; $i < 15; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             array_push($data, [
-                'post_id' => random_int(1, 10),
-                'label_id' => random_int(1, 10),
+                'post_id' => $i+1,
+                    'label_id' => random_int(1, 10),
             ]);
         }
 

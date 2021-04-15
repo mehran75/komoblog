@@ -91,7 +91,7 @@ class comments extends Controller
                 return Response([
                     'status' => 'Failed',
                     'message' => "You can't reach this post!"
-                ], 403);
+                ], 401);
             }
 
             $comment = new Comment;
@@ -131,11 +131,11 @@ class comments extends Controller
 
             $post = Post::findOrFail($id);
 
-            if (!$post->is_published && ($author == null || $author->id != $post->author_id)) {
+            if (!$post->is_published && ($author == null || $author->id != $post->author_id || $author->role != 'admin')) {
                 return Response([
                     'status' => 'Failed',
                     'message' => "You can't reach this post!"
-                ], 403);
+                ], 401);
             }
 
             $post->categories;
@@ -161,20 +161,21 @@ class comments extends Controller
      */
     public function update(Request $request, $id)
     {
+
         try {
             $request = $request->validate([
-                'body' => 'required|max:3000'
+                'body' => 'required|max:1000'
             ]);
 
-            $comment = Comment::findOrFail($id);
+            $comment = Comment::with('posts')
+                ->where('posts.is_published', true)
+                ->where('comments.author_id', Auth::id());
 
-            $post = Post::findOrFail($comment->post_id);
-
-            if (!$post->is_published) {
+            if ($comment->count() == 0) {
                 return Response([
                     'status' => 'Failed',
-                    'message' => "You can't reach this post!"
-                ], 403);
+                    'message' => "This comment or post doesn't exist"
+                ], 404);
             }
 
             $comment->body = $request['body'];
@@ -192,12 +193,12 @@ class comments extends Controller
         } catch (ModelNotFoundException $e) {
             return Response(['status' => 'Failed',
                 'message' => 'Model not found',
-                'debug' => $e]);
+                'debug' => $e], 404);
         } catch (ValidationException $e) {
             return Response([
                 'status' => 'Failed',
                 'data' => ['body' => 'A body is required']
-            ]);
+            ], 400);
         }
     }
 
@@ -212,13 +213,22 @@ class comments extends Controller
         // there should be a soft delete option though!
         try {
             $comment = Comment::findOrFail($id);
+
+            if ($comment->author_id != Auth::id() || Auth::user()->role != 'admin') {
+                return Response([
+                    'status', 'Failed',
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }
+
+
             $comment->post();
 
             if (!$comment->post->is_published) {
                 return Response([
                     'status' => 'Failed',
-                    'message' => "You can't reach this post!"
-                ], 403);
+                    'message' => "This comment or post doesn't exist"
+                ], 404);
             }
 
             $comment->delete();

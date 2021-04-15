@@ -40,6 +40,15 @@ class labels extends Controller
     {
         $request = $request->validated();
 
+
+        if (Auth::user()->role != 'admin') {
+            return Response([
+                'status' => 'Failed',
+                'message' => 'Unauthorized user'
+            ], 401);
+        }
+
+
         $label = new Label;
         $label->name = $request['name'];
         $label->created_by_id = Auth::id();
@@ -90,6 +99,15 @@ class labels extends Controller
     {
         $request = $request->validated();
 
+
+        if (Auth::user()->role != 'admin') {
+            return Response([
+                'status' => 'Failed',
+                'message' => 'Unauthorized user'
+            ], 401);
+        }
+
+
         $label = Label::findOrFail($id);
         $label->name = $request['name'];
 
@@ -123,6 +141,14 @@ class labels extends Controller
      */
     public function destroy($id)
     {
+
+        if (Auth::user()->role != 'admin') {
+            return Response([
+                'status' => 'Failed',
+                'message' => 'Unauthorized user'
+            ], 401);
+        }
+
         try {
 
             $count = PostLabel::where('label_id', $id)->count();;

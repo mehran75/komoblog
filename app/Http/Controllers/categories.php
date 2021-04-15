@@ -9,6 +9,7 @@ use App\Model\PostCategory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class categories extends Controller
@@ -33,6 +34,15 @@ class categories extends Controller
     public function store(CategoryRequest $request)
     {
         $request = $request->validated();
+
+
+        if (Auth::user()->role != 'admin') {
+            return Response([
+                'status' => 'Failed',
+                'message' => 'Unauthorized user'
+            ], 401);
+        }
+
 
         $cat = new Category;
         $cat->name = $request['name'];
@@ -83,6 +93,15 @@ class categories extends Controller
     {
         $request = $request->validated();
 
+
+        if (Auth::user()->role != 'admin') {
+            return Response([
+                'status' => 'Failed',
+                'message' => 'Unauthorized user'
+            ], 401);
+        }
+
+
         try {
 
             $cat = Category::findOrFail($id);
@@ -115,6 +134,13 @@ class categories extends Controller
      */
     public function destroy($id)
     {
+        if (Auth::user()->role != 'admin') {
+            return Response([
+                'status' => 'Failed',
+                'message' => 'Unauthorized user'
+            ], 401);
+        }
+
         try {
 
             $count = PostCategory::where('category_id', $id)->count();;

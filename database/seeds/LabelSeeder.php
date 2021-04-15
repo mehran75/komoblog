@@ -18,7 +18,7 @@ class LabelSeeder extends Seeder
         for ($i = 0; $i < 10; $i++) {
             array_push($data, [
                 'name' => Str::random(6),
-                'created_by_id' => random_int(1, 9)
+                'created_by_id' => 1
             ]);
         }
 

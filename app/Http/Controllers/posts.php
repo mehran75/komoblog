@@ -8,6 +8,7 @@ use App\Model\Label;
 use App\Model\Post;
 use App\Model\PostCategory;
 use App\Model\PostLabel;
+use App\Model\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Response;
@@ -23,6 +24,23 @@ class posts extends Controller
         $this->middleware('auth:api')->except(['index', 'show']);
     }
 
+
+    /**
+     * validates user permission
+     * @param $id               : target id you want to check
+     * @param null $custom_id   : if not using the middleware (Auth::id()), this can be set
+     * @return bool             : note that 'admin' role will always receive true value
+     * */
+    protected function checkUserPermission($id, $custom_id = null): bool
+    {
+        if ($custom_id != null) {
+            $user = User::findOrFail($custom_id);
+            return $user->id == $id || $user->role == 'admin';
+        }
+        return Auth::id() == $id || Auth::user()->role == 'admin';
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -37,9 +55,11 @@ class posts extends Controller
             $posts = Post::with('categories')
                 ->with('comments')
                 ->with('labels')
+                ->with('users')
                 ->where('is_published', true);
             if ($author != null) {
-                $posts = $posts->orWhere('author_id', $author->id);
+                $posts = $posts->orWhere('author_id', $author->id)
+                    ->orWhere('users.role', 'admin');
             }
 
             return Response([
@@ -74,7 +94,7 @@ class posts extends Controller
             $post->excerpt = $request['excerpt'];
             $post->author_id = Auth::id();
             $post->is_published = $request['is_published'];
-            $post->photo = $request['image_id'];
+            $post->photo = $request['photo'];
 
             if ($post->save()) {
 
@@ -92,7 +112,7 @@ class posts extends Controller
                 PostCategory::insert($data);
 
 //                assigning labels
-                if ($request['label_ids'] != null) {
+                if (array_key_exists('label_ids', $request)) {
                     $labels = Label::findOrFail($request['label_ids']);
                     $data = array();
 
@@ -149,16 +169,17 @@ class posts extends Controller
 
             $post = Post::findOrFail($id);
 
-            if (!$post->is_published && ($author == null || $author->id != $post->author_id)) {
+            if (!$post->is_published && !$this->checkUserPermission($author->id, $post->author_id)) {
                 return Response([
                     'status' => 'Failed',
                     'message' => "You can't reach this post!"
-                ], 403);
+                ], 401);
             }
 
             $post->categories;
             $post->comments;
             $post->labels;
+            $post->user;
             return Response([
                 'status' => 'Success',
                 'data' => $post
@@ -187,12 +208,19 @@ class posts extends Controller
             DB::beginTransaction();
 
             $post = Post::findORFail($id);
+
+            if (!$this->checkUserPermission($post->author_id)) {
+                return Response([
+                    'status' => 'Failed',
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }
+
             $post->title = $request['title'];
             $post->body = $request['body'];
             $post->excerpt = $request['excerpt'];
-            $post->author_id = Auth::id();
             $post->is_published = $request['is_published'];
-            $post->photo = $request['image_id'];
+            $post->photo = $request['photo'];
 
             if ($post->save()) {
 
@@ -276,7 +304,16 @@ class posts extends Controller
         try {
             DB::beginTransaction();
 
-            Post::findOrFail($id)->delete();
+            $post = Post::findOrFail($id);
+
+            if (!$this->checkUserPermission($post->author_id)) {
+                return Response([
+                    'status' => 'Failed',
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }
+
+            $post->delete();
             DB::table('post_categories')->where('post_id', $id)->delete();
             DB::table('post_labels')->where('post_id', $id)->delete();
 

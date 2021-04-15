@@ -4,6 +4,8 @@ namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 use \Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Post extends Model
 {
@@ -12,7 +14,7 @@ class Post extends Model
         return $this->belongsToMany(Category::class, 'post_categories');
     }
 
-    public function comments()
+    public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
     }
@@ -22,4 +24,8 @@ class Post extends Model
         return $this->belongsToMany(Label::class, 'post_labels');
     }
 
+    public function author(): HasOne
+    {
+        return $this->hasOne(User::class);
+    }
 }

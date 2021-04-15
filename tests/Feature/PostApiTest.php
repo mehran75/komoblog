@@ -5,20 +5,28 @@ namespace Tests\Feature;
 use App\Model\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class PostApiTest extends TestCase
 {
 
+    protected $user;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->withoutExceptionHandling();
 
-        $user = factory(User::class)->create();
-        $this->actingAs($user, 'api');
+//        $user = factory(User::class)->create();
+        $this->actingAs(User::find(2), 'api');
 
+    }
+
+    protected function getUser($id)
+    {
+        return User::findOrFail($id);
     }
 
     /**
@@ -29,28 +37,25 @@ class PostApiTest extends TestCase
      */
     public function testCreatePost1()
     {
-
         $data = [
             'title' => 'test1',
-            'body' => Str::random(random_int(100, 1000)),
+            'body' => Str::random(random_int(250, 1000)),
             'excerpt' => 'test test test ...',
-            'image_id' => 'test.png',
+            'photo' => 'test.png',
             'is_published' => true,
-            'category_ids' => [1 , 5]
+            'category_ids' => [1, 5],
+            'label_ids' => [5, 3]
         ];
 
         $this->post('api/posts', $data)
             ->assertStatus(200)
             ->assertJson([
-                'status' => 'Success',
-                'data' => $data
-            ]);
+                'status' => 'Success']);
     }
 
     /**
-     * A basic feature test example.
      * @group store_post
-     * @return void
+     * validation error
      */
     public function testCreatePost2()
     {
@@ -61,6 +66,117 @@ class PostApiTest extends TestCase
         ]);
 
 
-        $response->assertStatus(500);
+        $response->assertStatus(422);
     }
+
+    /**
+     * @group store_post
+     * validation error
+     */
+    public function testCreatePost3()
+    {
+        $response = $this->post('api/posts', [
+            'title' => 'test1',
+            'body' => Str::random(random_int(250, 1000)),
+            'excerpt' => 'test test test ...',
+            'photo' => 'test.png',
+            'is_published' => true,
+            'category_ids' => [1, 5],
+            'label_ids' => [5, 3, 2, 4, 1, 6]
+        ]);
+
+
+        $response->assertStatus(422);
+    }
+
+
+    /**
+     * A basic feature test example.
+     * @group show_post
+     * @return void
+     * successful
+     */
+    public function testShowPost1()
+    {
+        $this->get('api/posts/1')
+            ->assertStatus(200)
+            ->assertJsonStructure([
+                'status',
+                'data' => [
+                    'title',
+                    'body',
+                    'excerpt',
+                    'photo',
+                    'is_published',
+                    'categories',
+                    'labels',
+                    'comments'
+                ]
+            ]);
+    }
+
+
+    /**
+     * A basic feature test example.
+     * @group show_post
+     * @return void
+     * unauthorized user
+     */
+    public function testShowPost2()
+    {
+
+        $this->actingAs(User::findOrFail(2));
+
+        $this->get('api/posts/2')
+            ->assertStatus(401);
+    }
+
+
+    /**
+     * A basic feature test example.
+     * @group update_post
+     * @return void
+     * successful
+     */
+    public function testUpdatePost1()
+    {
+        $data = [
+            'title' => 'test1',
+            'body' => Str::random(random_int(250, 500)),
+            'excerpt' => 'test test test ...',
+            'photo' => 'test.png',
+            'is_published' => 0,
+            'category_ids' => [1, 5],
+            'label_ids' => [5, 3]
+        ];
+
+        $this->patch('api/posts/9', $data)
+            ->assertStatus(200)
+            ->assertJson([
+                'status' => 'Success']);
+    }
+
+    /**
+     * A basic feature test example.
+     * @group update_post
+     * @return void
+     * unauthorized user
+     */
+    public function testUpdatePost2()
+    {
+        $data = [
+            'title' => 'test1',
+            'body' => Str::random(random_int(250, 500)),
+            'excerpt' => 'test test test ...',
+            'photo' => 'test.png',
+            'is_published' => false,
+            'category_ids' => [1, 5],
+            'label_ids' => [5, 3]
+        ];
+
+        $this->patch('api/posts/9', $data)
+            ->assertStatus(401);
+    }
+
+
 }
