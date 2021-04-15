@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Model\Post;
 use App\Model\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -20,7 +21,7 @@ class PostApiTest extends TestCase
         $this->withoutExceptionHandling();
 
 //        $user = factory(User::class)->create();
-        $this->actingAs(User::find(2), 'api');
+        $this->actingAs(User::find(3), 'api');
 
     }
 
@@ -127,8 +128,14 @@ class PostApiTest extends TestCase
 
         $this->actingAs(User::findOrFail(2));
 
-        $this->get('api/posts/2')
+        $post_id = DB::table('posts')
+            ->where('is_published', false)
+            ->whereNotIn('author_id', [1, 2])->first();
+
+        $this->get('api/posts/'. $post_id->id)
             ->assertStatus(401);
+
+
     }
 
 
@@ -150,7 +157,12 @@ class PostApiTest extends TestCase
             'label_ids' => [5, 3]
         ];
 
-        $this->patch('api/posts/9', $data)
+        $post_id = DB::table('posts')
+            ->where('author_id', 3)->first();
+
+
+
+        $this->patch('api/posts/'. $post_id->id, $data)
             ->assertStatus(200)
             ->assertJson([
                 'status' => 'Success']);
@@ -174,7 +186,12 @@ class PostApiTest extends TestCase
             'label_ids' => [5, 3]
         ];
 
-        $this->patch('api/posts/9', $data)
+
+        $post_id = DB::table('posts')
+            ->where('author_id', [1, 3])->first();
+
+
+        $this->patch('api/posts/'. $post_id->id, $data)
             ->assertStatus(401);
     }
 
