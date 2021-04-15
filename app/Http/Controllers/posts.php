@@ -223,7 +223,6 @@ class posts extends Controller
             $post->photo = $request['photo'];
 
             if ($post->save()) {
-
 //                deleting previous assignments
                 DB::table('post_categories')
                     ->where('post_id', $post->id)->delete();

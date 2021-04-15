@@ -126,13 +126,11 @@ class PostApiTest extends TestCase
     public function testShowPost2()
     {
 
-        $this->actingAs(User::findOrFail(2));
-
         $post_id = DB::table('posts')
             ->where('is_published', false)
-            ->whereNotIn('author_id', [1, 2])->first();
+            ->whereNotIn('author_id', [3])->first();
 
-        $this->get('api/posts/'. $post_id->id)
+        $this->get('api/posts/' . $post_id->id)
             ->assertStatus(401);
 
 
@@ -161,8 +159,7 @@ class PostApiTest extends TestCase
             ->where('author_id', 3)->first();
 
 
-
-        $this->patch('api/posts/'. $post_id->id, $data)
+        $this->patch('api/posts/' . $post_id->id, $data)
             ->assertStatus(200)
             ->assertJson([
                 'status' => 'Success']);
@@ -176,6 +173,7 @@ class PostApiTest extends TestCase
      */
     public function testUpdatePost2()
     {
+
         $data = [
             'title' => 'test1',
             'body' => Str::random(random_int(250, 500)),
@@ -188,12 +186,58 @@ class PostApiTest extends TestCase
 
 
         $post_id = DB::table('posts')
-            ->where('author_id', [1, 3])->first();
+            ->where('author_id', [1, 2])->first();
 
 
-        $this->patch('api/posts/'. $post_id->id, $data)
+        $this->patch('api/posts/' . $post_id->id, $data)
             ->assertStatus(401);
     }
 
 
+    /**
+     * A basic feature test example.
+     * @group destroy_post
+     * @return void
+     * successful
+     */
+    public function testDestroyPost1()
+    {
+
+        $post = Post::all()->last();
+
+//        make sure the post author is the current user
+        $post->author_id = 3;
+        $post->save();
+
+        $this->delete('api/posts/' . $post->id)
+            ->assertStatus(200)
+            ->assertJson([
+                'status' => 'Success'
+            ]);
+
+    }
+
+
+    /**
+     * A basic feature test example.
+     * @group destroy_post
+     * @return void
+     * unauthorized user
+     */
+    public function testDestroyPost2()
+    {
+
+        $post = Post::all()->last();
+
+//        make sure the post author is not the current user
+        $post->author_id = 2;
+        $post->save();
+
+        $this->delete('api/posts/' . $post->id)
+            ->assertStatus(401)
+            ->assertJson([
+                'status' => 'Failed'
+            ]);
+
+    }
 }
