@@ -5,14 +5,20 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryResource;
+use App\Interfaces\CategorytInterface;
 use App\Model\Category;
 use App\Model\PostCategory;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use App\Repositories\CategoryRepository;
 
 class CategoryController extends Controller
 {
+
+    protected CategoryRepository $categoryRepository;
+
+    public function __construct(CategoryRepository $categoryRepository)
+    {
+        $this->categoryRepository = $categoryRepository;
+    }
 
     /**
      * Display a listing of the resource.
@@ -21,37 +27,29 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        return CategoryResource::collection(Category::paginate());
+        return CategoryResource::collection($this->categoryRepository->indexCategories());
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param \App\Http\Requests\CategoryRequest $request
-     * @return \Illuminate\Http\Response
+     * @return CategoryResource
      */
     public function store(CategoryRequest $request)
     {
-        $request = $request->validated();
-
-        $cat = new Category;
-        $cat->name = $request['name'];
-        $cat->save();
-
-        return response(new CategoryResource($cat), 201);
-
-
+        return new CategoryResource($this->categoryRepository->storeCategory($request->validated()));
     }
 
     /**
      * Display the specified resource.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return CategoryResource
      */
     public function show($id)
     {
-        return response(new CategoryResource(Category::findOrFail($id)));
+        return new CategoryResource($this->categoryRepository->showCategory($id));
     }
 
     /**
@@ -59,42 +57,26 @@ class CategoryController extends Controller
      *
      * @param \App\Http\Requests\CategoryRequest $request
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return CategoryResource
      */
     public
     function update(CategoryRequest $request, $id)
     {
-        $request = $request->validated();
-
-        $cat = Category::findOrFail($id);
-        $cat->name = $request['name'];
-
-        $cat->update();
-
-        return response(new CategoryResource($cat), 201);
-
+        return new CategoryResource($this->categoryRepository->updateCategory($request->validated(), $id));
     }
 
     /**
      * Remove the specified resource from storage.
      *
+     * @param CategoryRequest $request
      * @param int $id
      * @return \Illuminate\Http\Response
      */
     public
-    function destroy($id)
+    function destroy(CategoryRequest $request, $id)
     {
-
-        if (PostCategory::where('category_id', $id)->exists()) {
-            return response(
-                ['message' => "Category can not be removed! there are postController attached to it"]);
-        }
-
-        $cat = Category::findOrFail($id);
-        $cat->delete();
-
         return response([
-            'message' => 'category destroyed!'
+            'success' => $this->categoryRepository->deleteCategory($id)
         ]);
 
     }

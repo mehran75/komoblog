@@ -29,6 +29,9 @@ class CategoryRequest extends FormRequest
      */
     public function rules()
     {
+        if ($this->method() == 'DELETE') {
+            return [];
+        }
         return [
             'name' => ['required', 'max:150']
         ];
