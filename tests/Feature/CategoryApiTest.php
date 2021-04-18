@@ -34,7 +34,7 @@ class CategoryApiTest extends TestCase
 
     public function testCreateCategory1()
     {
-        $this->post('api/categories', [
+        $this->post('api/categoryController', [
             'name' => Str::random(7)
         ])->assertStatus(200)
             ->assertJson(['status' => 'Success']);
@@ -49,7 +49,7 @@ class CategoryApiTest extends TestCase
 
     public function testCreateCategory2()
     {
-        $this->post('api/categories', [])
+        $this->post('api/categoryController', [])
             ->assertStatus(422)
             ->assertJson(['status' => 'Failed']);
 
@@ -64,14 +64,14 @@ class CategoryApiTest extends TestCase
     public function testCreateCategory3()
     {
         $name = strtr(Str::random(7), '0123456789', str_repeat('C', 10));
-        $response = $this->post('api/categories', [
+        $response = $this->post('api/categoryController', [
             'name' => $name,
         ]);
 
         if ($response->status() != 200) {
             self::assertTrue(false);
         }
-        $this->post('api/categories', [
+        $this->post('api/categoryController', [
             'name' => $name,
         ])->assertStatus(200)
             ->assertJson(['status' => 'Failed']);
@@ -89,7 +89,7 @@ class CategoryApiTest extends TestCase
         $this->actingAs(User::findOrFail(2));
 
         $name = strtr(Str::random(7), '0123456789', str_repeat('C', 10));
-        $this->post('api/categories', [
+        $this->post('api/categoryController', [
             'name' => $name,
         ])->assertStatus(401)
             ->assertJson(['status' => 'Failed']);
@@ -107,7 +107,7 @@ class CategoryApiTest extends TestCase
     public function testDestroyCategory1()
     {
         $cat_id = Category::all()->last()->id;
-        $this->delete('api/categories/'. $cat_id)
+        $this->delete('api/categoryController/'. $cat_id)
             ->assertStatus(200)
             ->assertJson([
                     'status' => 'Success'
@@ -127,7 +127,7 @@ class CategoryApiTest extends TestCase
 
         $cat_id = Category::all()->last()->id;
 
-        $this->delete('api/categories/' . $cat_id)
+        $this->delete('api/categoryController/' . $cat_id)
             ->assertStatus(401)
             ->assertJson([
                     'status' => 'Failed'

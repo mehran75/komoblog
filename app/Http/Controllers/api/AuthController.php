@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
 use App\Model\User;
+use App\Rules\StrongPassword;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+
 
 class AuthController extends Controller
 {
@@ -54,7 +55,7 @@ class AuthController extends Controller
 
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required|min:8'
+            'password' => ['required', new StrongPassword]
         ]);
 
         if (Auth::attempt(['email' => $request->input('email'),
@@ -66,21 +67,14 @@ class AuthController extends Controller
             if ($request->remember_me)
                 $token->expires_at = Carbon::now()->addWeeks(1);
 
-            if ($token->save()) {
-                return Response([
-                    'status' => 'Success',
-                    'access_token' => $tokenResult->accessToken,
-                    'token_type' => 'Bearer',
-                    'expires_at' => Carbon::parse(
-                        $tokenResult->token->expires_at
-                    )->toDateTimeString()
-                ]);
-            } else {
-                return Response([
-                    'status' => 'Failed',
-                    'message' => 'something blew up back here!'
-                ], 500);
-            }
+            $token->save();
+            return Response([
+                'access_token' => $tokenResult->accessToken,
+                'token_type' => 'Bearer',
+                'expires_at' => Carbon::parse(
+                    $tokenResult->token->expires_at
+                )->toDateTimeString()
+            ]);
         }
 
         return Response([
@@ -112,8 +106,8 @@ class AuthController extends Controller
      *
      * @return [json] user object
      */
-    public function user(Request $request)
+    public function user()
     {
-        return response()->json($request->user());
+        return response()->json(Auth::user());
     }
 }

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 
-class labels extends Controller
+class labelController extends Controller
 {
 
     public function __construct()
@@ -155,7 +155,7 @@ class labels extends Controller
 
             if ($count != 0) {
                 return Response(['status' => 'Failed',
-                    'message' => "Label can not be removed! there are posts attached to it"]);
+                    'message' => "Label can not be removed! there are postController attached to it"]);
             }
 
             $label = Label::findOrFail($id);

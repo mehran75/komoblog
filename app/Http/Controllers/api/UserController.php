@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-class users extends Controller
+class userController extends Controller
 {
 
     /**
@@ -30,7 +30,7 @@ class users extends Controller
             ], 403);
         }
 
-        return Response(DB::table('users')->paginate(10));
+        return Response(DB::table('userController')->paginate(10));
     }
 
     public function show($id)
@@ -103,7 +103,7 @@ class users extends Controller
 //
 //        if ($count != 0) {
 //            return Response(['status' => 'Failed',
-//                'message' => "Category can not be removed! there are posts attached to it"]);
+//                'message' => "Category can not be removed! there are postController attached to it"]);
 //        }
 //
 //        $cat = Category::findOrFail($id);

@@ -3,11 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CommentRequest;
-use App\Http\Requests\PostRequest;
-use App\Model\Category;
 use App\Model\Comment;
 use App\Model\Post;
-use App\Model\PostCategory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -17,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Mockery\Exception;
 
-class comments extends Controller
+class CommentController extends Controller
 {
 
 
@@ -42,22 +39,20 @@ class comments extends Controller
                 $post = Post::findOrFail($post_id);
 
                 if (!$post->is_published) {
-
-                    return Response([
-                        'status' => 'Failed',
+                    return response([
                         'message' => "You can't reach this post!"
                     ], 403);
 
                 }
             }
-            $comments = DB::table('comments')
-                ->select('comments.*')
-                ->join('posts', 'posts.id', '=', 'comments.post_id')
+            $comments = DB::table('commentController')
+                ->select('commentController.*')
+                ->join('postController', 'postController.id', '=', 'commentController.post_id')
                 ->where('post_id', $post_id)
-                ->where('posts.is_published', true);
+                ->where('postController.is_published', true);
 
             if ($author != null) {
-                $comments = $comments->orWhere('posts.author_id', $author);
+                $comments = $comments->orWhere('postController.author_id', $author);
             }
 
             return Response([
@@ -79,7 +74,7 @@ class comments extends Controller
      * @param \App\Http\Requests\CommentRequest $request
      * @return \Illuminate\Http\Response
      */
-    public function store(CommentRequest $request): Response
+    public function store(CommentRequest $request)
     {
 
         $request = $request->validated();
@@ -167,9 +162,9 @@ class comments extends Controller
                 'body' => 'required|max:1000'
             ]);
 
-            $comment = Comment::with('posts')
-                ->where('posts.is_published', true)
-                ->where('comments.author_id', Auth::id());
+            $comment = Comment::with('postController')
+                ->where('postController.is_published', true)
+                ->where('commentController.author_id', Auth::id());
 
             if ($comment->count() == 0) {
                 return Response([

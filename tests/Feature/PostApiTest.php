@@ -48,7 +48,7 @@ class PostApiTest extends TestCase
             'label_ids' => [5, 3]
         ];
 
-        $this->post('api/posts', $data)
+        $this->post('api/postController', $data)
             ->assertStatus(200)
             ->assertJson([
                 'status' => 'Success']);
@@ -60,7 +60,7 @@ class PostApiTest extends TestCase
      */
     public function testCreatePost2()
     {
-        $response = $this->post('api/posts', [
+        $response = $this->post('api/postController', [
             'title' => 'test1',
             'body' => 'lourom ipsum glergnoergerg',
             'categoriy_ids' => [1, 2],
@@ -76,7 +76,7 @@ class PostApiTest extends TestCase
      */
     public function testCreatePost3()
     {
-        $response = $this->post('api/posts', [
+        $response = $this->post('api/postController', [
             'title' => 'test1',
             'body' => Str::random(random_int(250, 1000)),
             'excerpt' => 'test test test ...',
@@ -99,7 +99,7 @@ class PostApiTest extends TestCase
      */
     public function testShowPost1()
     {
-        $this->get('api/posts/1')
+        $this->get('api/postController/1')
             ->assertStatus(200)
             ->assertJsonStructure([
                 'status',
@@ -109,9 +109,9 @@ class PostApiTest extends TestCase
                     'excerpt',
                     'photo',
                     'is_published',
-                    'categories',
-                    'labels',
-                    'comments'
+                    'categoryController',
+                    'labelController',
+                    'commentController'
                 ]
             ]);
     }
@@ -126,11 +126,11 @@ class PostApiTest extends TestCase
     public function testShowPost2()
     {
 
-        $post_id = DB::table('posts')
+        $post_id = DB::table('postController')
             ->where('is_published', false)
             ->whereNotIn('author_id', [3])->first();
 
-        $this->get('api/posts/' . $post_id->id)
+        $this->get('api/postController/' . $post_id->id)
             ->assertStatus(401);
 
 
@@ -155,11 +155,11 @@ class PostApiTest extends TestCase
             'label_ids' => [5, 3]
         ];
 
-        $post_id = DB::table('posts')
+        $post_id = DB::table('postController')
             ->where('author_id', 3)->first();
 
 
-        $this->patch('api/posts/' . $post_id->id, $data)
+        $this->patch('api/postController/' . $post_id->id, $data)
             ->assertStatus(200)
             ->assertJson([
                 'status' => 'Success']);
@@ -185,11 +185,11 @@ class PostApiTest extends TestCase
         ];
 
 
-        $post_id = DB::table('posts')
+        $post_id = DB::table('postController')
             ->where('author_id', [1, 2])->first();
 
 
-        $this->patch('api/posts/' . $post_id->id, $data)
+        $this->patch('api/postController/' . $post_id->id, $data)
             ->assertStatus(401);
     }
 
@@ -209,7 +209,7 @@ class PostApiTest extends TestCase
         $post->author_id = 3;
         $post->save();
 
-        $this->delete('api/posts/' . $post->id)
+        $this->delete('api/postController/' . $post->id)
             ->assertStatus(200)
             ->assertJson([
                 'status' => 'Success'
@@ -233,7 +233,7 @@ class PostApiTest extends TestCase
         $post->author_id = 2;
         $post->save();
 
-        $this->delete('api/posts/' . $post->id)
+        $this->delete('api/postController/' . $post->id)
             ->assertStatus(401)
             ->assertJson([
                 'status' => 'Failed'

@@ -25,7 +25,7 @@ class UploadController extends Controller
 
         $imageName = time() . '.' . $request->image->extension();
 
-        $request->image->move(public_path('images'), $imageName);
+        $request->photo->move(public_path('images'), $imageName);
 
         return Response(['status' => 'Success',
             'message' => 'Image Uploaded Successfully',

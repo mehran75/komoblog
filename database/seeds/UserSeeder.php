@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
@@ -13,23 +14,24 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
+        $hash = Hash::make('P@ssw0rd');
         $data = [
             [
                 'name' => 'Mehran Rafiee',
                 'email' => 'mehranrafiee5@gmail.com',
-                'password' => '@Mehran1234',
+                'password' => $hash,
                 'role' => 'admin'
             ],
             [
                 'name' => 'Akbar salemi',
                 'email' => 'akbar123@gmail.com',
-                'password' => 'P@ssw0rd',
+                'password' => $hash,
                 'role' => 'user'
             ],
             [
                 'name' => 'Asghar kharabi',
                 'email' => 'asghar321@gmail.com',
-                'password' => 'P@ssw0rd',
+                'password' => $hash,
                 'role' => 'user'
             ],
 

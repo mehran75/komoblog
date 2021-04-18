@@ -13,12 +13,13 @@ class CategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     * Only 'admin' user can make changes on a category
      *
      * @return bool
      */
     public function authorize()
     {
-        return true;
+        return Auth::check() && Auth::user()->role == 'admin';
     }
 
     /**

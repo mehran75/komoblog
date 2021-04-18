@@ -19,20 +19,22 @@ Route::get('/ping', function () {
 
 
 Route::group([], function() {
-    Route::post('login', 'AuthController@login');
-    Route::post('signUp', 'AuthController@signup');
+    Route::post('login', 'api\AuthController@login');
+    Route::post('signUp', 'api\AuthController@signup');
 
     Route::group([
         'middleware' => 'auth:api'
     ], function() {
         Route::get('logout', 'AuthController@logout');
         Route::get('user', 'AuthController@user');
+
+        Route::post('uploadImage', 'UploadController@uploadImage');
+        Route::apiResource('users', 'api\UserController');
+        Route::apiResource('categories', 'api\CategoryController');
+
     });
 });
 
-Route::middleware('auth:api')->post('uploadImage', 'UploadController@uploadImage');
-Route::middleware('auth:api')->apiResource('users', 'users');
-Route::middleware('auth:api')->apiResource('categories', 'categories');
-Route::apiResource('posts', 'posts');
-Route::apiResource('posts.comments', 'comments')->shallow();
-Route::apiResource('labels', 'labels');
+Route::apiResource('posts', 'api\PostController');
+Route::apiResource('posts.comments', 'api\CommentController')->shallow();
+Route::apiResource('labels', 'api\LabelController');
