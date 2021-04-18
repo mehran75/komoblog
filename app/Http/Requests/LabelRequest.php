@@ -17,7 +17,7 @@ class LabelRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::check();
+        return auth('api')->check() && auth('api')->user()->role == 'admin';
     }
 
     /**
@@ -27,25 +27,13 @@ class LabelRequest extends FormRequest
      */
     public function rules()
     {
+        if ($this->method() == 'DELETE') {
+            return [];
+        }
+
         return [
             'name' => 'required|max:30|min:2'
         ];
     }
 
-
-    protected function failedValidation(Validator $validator)
-    {
-        $errors = (new ValidationException($validator))->errors();
-        throw new HttpResponseException(
-            response()->json(['status' => 'Failed', 'data' => $errors], 422)
-        );
-    }
-
-
-    protected function failedAuthorization()
-    {
-        throw new HttpResponseException(
-            response()->json(['status' => 'Failed', 'message' => 'user is not logged in!'], 403)
-        );
-    }
 }

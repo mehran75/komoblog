@@ -29,11 +29,9 @@ Route::group([], function() {
         Route::get('user', 'AuthController@user');
 
         Route::apiResource('users', 'api\UserController');
-        Route::apiResource('categories', 'api\CategoryController');
-
     });
 });
-
+Route::apiResource('categories', 'api\CategoryController');
+Route::apiResource('labels', 'api\LabelController');
 Route::apiResource('posts', 'api\PostController');
 Route::apiResource('posts.comments', 'api\CommentController')->shallow();
-Route::apiResource('labels', 'api\LabelController');

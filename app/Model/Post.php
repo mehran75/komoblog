@@ -11,6 +11,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Post extends Model
 {
 
+    protected $fillable = [
+        'title',
+        'body',
+        'excerpt',
+        'author_id',
+        'is_published',
+        'photo',
+    ];
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'post_categories');

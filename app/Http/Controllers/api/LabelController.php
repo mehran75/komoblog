@@ -1,91 +1,52 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\LabelRequest;
-use App\Model\Label;
-use App\Model\PostLabel;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\LabelResource;
+use App\Repositories\LabelRepository;
 
-class labelController extends Controller
+class LabelController extends Controller
 {
 
-    public function __construct()
+    protected LabelRepository $labelRepository;
+
+    public function __construct(LabelRepository $labelRepository)
     {
-        $this->middleware('auth:api')->except(['index', 'show']);
+        $this->labelRepository = $labelRepository;
     }
 
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index()
     {
-        return Response([
-            'status' => 'Success',
-            'data' => Label::all()
-        ]);
+        return LabelResource::collection($this->labelRepository->indexLabels());
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param \App\Http\Requests\LabelRequest $request
-     * @return \Illuminate\Http\Response
+     * @return LabelResource
      */
     public function store(LabelRequest $request)
     {
-        $request = $request->validated();
-
-
-        if (Auth::user()->role != 'admin') {
-            return Response([
-                'status' => 'Failed',
-                'message' => 'Unauthorized user'
-            ], 401);
-        }
-
-
-        $label = new Label;
-        $label->name = $request['name'];
-        $label->created_by_id = Auth::id();
-
-        try {
-            $label->saveOrFail();
-
-            return Response([
-                'status' => 'Success',
-                'data' => $label,
-            ]);
-
-        } catch (QueryException $e) {
-            return Response([
-                'status' => 'Failed',
-                'message' => 'failed to create your requested label',
-                'debug' => $e
-            ], 500);
-        }
-
+        return new LabelResource($this->labelRepository->storeLabel($request->validated()));
     }
 
     /**
      * Display the specified resource.
      *
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return LabelResource
      */
     public function show($id)
     {
-        try {
-            return Response(Label::findOrFail($id));
-        } catch (ModelNotFoundException $e) {
-            return Response(['status' => 'Failed',
-                'message' => 'Model not found',
-                'debug' => $e]);
-        }
+        return new LabelResource($this->labelRepository->showLabel($id));
     }
 
     /**
@@ -93,44 +54,11 @@ class labelController extends Controller
      *
      * @param \App\Http\Requests\LabelRequest $request
      * @param int $id
-     * @return \Illuminate\Http\Response
+     * @return LabelResource
      */
     public function update(LabelRequest $request, $id)
     {
-        $request = $request->validated();
-
-
-        if (Auth::user()->role != 'admin') {
-            return Response([
-                'status' => 'Failed',
-                'message' => 'Unauthorized user'
-            ], 401);
-        }
-
-
-        $label = Label::findOrFail($id);
-        $label->name = $request['name'];
-
-        try {
-            if ($label->update()) {
-                return Response([
-                    'status' => 'Success',
-                    'data' => $label,
-                ]);
-            } else {
-                return Response([
-                    'status' => 'Failed',
-                    'message' => 'failed to update the label!'
-                ], 500);
-            }
-
-        } catch (QueryException $e) {
-            return Response([
-                'status' => 'Failed',
-                'message' => 'failed to create your requested label',
-                'debug' => $e
-            ], 500);
-        }
+        return new LabelResource($this->labelRepository->updateLabel($request->validated(), $id));
     }
 
     /**
@@ -141,38 +69,8 @@ class labelController extends Controller
      */
     public function destroy($id)
     {
-
-        if (Auth::user()->role != 'admin') {
-            return Response([
-                'status' => 'Failed',
-                'message' => 'Unauthorized user'
-            ], 401);
-        }
-
-        try {
-
-            $count = PostLabel::where('label_id', $id)->count();;
-
-            if ($count != 0) {
-                return Response(['status' => 'Failed',
-                    'message' => "Label can not be removed! there are postController attached to it"]);
-            }
-
-            $label = Label::findOrFail($id);
-            if ($label->delete()) {
-                return Response([
-                    'status' => 'Success'
-                ]);
-            } else {
-                return Response([
-                    'status' => 'Failed',
-                    'message' => "couldn't delete the Label"
-                ]);
-            }
-        } catch (ModelNotFoundException $e) {
-            return Response(['status' => 'Failed',
-                'message' => 'Label not found',
-                'debug' => $e]);
-        }
+        return response([
+            'success' => $this->labelRepository->deleteLabel($id)
+        ]);
     }
 }

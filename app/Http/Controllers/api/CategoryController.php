@@ -5,9 +5,6 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryResource;
-use App\Interfaces\CategorytInterface;
-use App\Model\Category;
-use App\Model\PostCategory;
 use App\Repositories\CategoryRepository;
 
 class CategoryController extends Controller
@@ -59,8 +56,7 @@ class CategoryController extends Controller
      * @param int $id
      * @return CategoryResource
      */
-    public
-    function update(CategoryRequest $request, $id)
+    public function update(CategoryRequest $request, $id)
     {
         return new CategoryResource($this->categoryRepository->updateCategory($request->validated(), $id));
     }
@@ -72,8 +68,7 @@ class CategoryController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public
-    function destroy(CategoryRequest $request, $id)
+    public function destroy(CategoryRequest $request, $id)
     {
         return response([
             'success' => $this->categoryRepository->deleteCategory($id)

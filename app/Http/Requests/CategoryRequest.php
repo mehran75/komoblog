@@ -19,7 +19,8 @@ class CategoryRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::check() && Auth::user()->role == 'admin';
+//        not the best approach
+        return auth('api')->check() && auth('api')->user()->role == 'admin';
     }
 
     /**
@@ -37,12 +38,4 @@ class CategoryRequest extends FormRequest
         ];
     }
 
-
-    protected function failedValidation(Validator $validator)
-    {
-        $errors = (new ValidationException($validator))->errors();
-        throw new HttpResponseException(
-            response()->json(['status' => 'Failed', 'data' => $errors], 422)
-        );
-    }
 }

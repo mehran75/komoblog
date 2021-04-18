@@ -2,6 +2,10 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Auth\Factory;
+use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -15,7 +19,7 @@ class PostRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      *
-     * @return bool|\Illuminate\Contracts\Auth\Factory|\Illuminate\Contracts\Auth\Guard|\Illuminate\Contracts\Auth\StatefulGuard|\Illuminate\Contracts\Foundation\Application
+     * @return bool|Factory|Guard|StatefulGuard|Application
      */
     public function authorize()
     {

@@ -10,6 +10,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Comment extends Model
 {
 
+    protected $fillable = [
+        'body',
+        'author_id',
+        'post_id',
+    ];
+
     public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class);
