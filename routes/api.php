@@ -28,7 +28,6 @@ Route::group([], function() {
         Route::get('logout', 'AuthController@logout');
         Route::get('user', 'AuthController@user');
 
-        Route::post('uploadImage', 'UploadController@uploadImage');
         Route::apiResource('users', 'api\UserController');
         Route::apiResource('categories', 'api\CategoryController');
 

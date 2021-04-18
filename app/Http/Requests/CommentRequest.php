@@ -5,8 +5,6 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class CommentRequest extends FormRequest
@@ -14,11 +12,11 @@ class CommentRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      *
-     * @return bool
+     * @return \Illuminate\Contracts\Auth\Authenticatable
      */
     public function authorize()
     {
-        return Auth::check();
+        return auth('api')->user();
     }
 
     /**
@@ -30,7 +28,6 @@ class CommentRequest extends FormRequest
     {
         return [
             'body' => 'required|max:3000',
-            'post_id' => 'required',
         ];
     }
 

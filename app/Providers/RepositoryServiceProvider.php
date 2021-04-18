@@ -14,6 +14,11 @@ class RepositoryServiceProvider extends ServiceProvider
             'App\Interfaces\PostInterface',
             'App\Repositories\PostRepository'
         );
+
+        $this->app->bind(
+            'App\Interfaces\CommentInterface',
+            'App\Repositories\CommentRepository'
+        );
     }
 
 }

@@ -18,7 +18,7 @@ interface CommentInterface
      * @param array $values
      * @return Comment
      */
-    public function storeComment(array $values);
+    public function storeComment(array $values, $postId);
 
 
     /**
@@ -42,7 +42,7 @@ interface CommentInterface
      * @param array $values
      * @return Comment
      */
-    public function updateComment($id, array $values);
+    public function updateComment(array $values, $id);
 
     /**
      *  delete a post
@@ -50,7 +50,7 @@ interface CommentInterface
      * @param $id
      * @return bool
      */
-    public function deletePost($user, $id): bool;
+    public function deleteComment($user, $id): bool;
 
 
 
