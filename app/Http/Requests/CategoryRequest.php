@@ -20,7 +20,8 @@ class CategoryRequest extends FormRequest
     public function authorize()
     {
 //        not the best approach
-        return auth('api')->check() && auth('api')->user()->role == 'admin';
+        $user = auth('api')->user();
+        return $user != null && $user->role == 'admin';
     }
 
     /**
