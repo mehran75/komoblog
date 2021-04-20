@@ -63,9 +63,9 @@ class postController extends Controller
             $data = $request->validated();
             $data['photo'] = $imageName;
 //            not the best approach
-            $data['author_id'] = auth('api')->user()->id;
+            $user = auth('api')->user()->id;
 
-            $post = $this->postInterface->storePost($data);
+            $post = $this->postInterface->storePost($data, $user);
 
             return response(new PostResource($post));
         } catch (Exception $e) {
@@ -112,10 +112,7 @@ class postController extends Controller
                 $data['photo'] = $imageName;
             }
 
-//            not the best approach
-            $data['author_id'] = auth('api')->user()->id;
-
-            $post = $this->postInterface->updatePost($id, $data);
+            $post = $this->postInterface->updatePost($id, $data, auth('api')->user()->id);
 
             return response(new PostResource($post));
         } catch (Exception $e) {

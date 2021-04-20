@@ -19,7 +19,7 @@ class LabelRepository implements LabelInterface
         $label = new Label();
         $label->name = $values['name'];
 
-        $label->saveOrFail();
+        $label->save();
 
         return $label;
     }
@@ -47,7 +47,7 @@ class LabelRepository implements LabelInterface
     {
         $label = Label::findOrFail($id);
         $label->name = $values['name'];
-        $label->saveOrFail();
+        $label->save();
 
         return $label;
     }

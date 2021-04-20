@@ -11,6 +11,7 @@ use App\Model\Label;
 use App\Model\Post;
 use App\Model\PostCategory;
 use App\Model\PostLabel;
+use App\Model\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Resources\Json\PaginatedResourceResponse;
@@ -27,24 +28,24 @@ class PostRepository implements PostInterface
     public function indexPosts($user)
     {
 
-        $posts = Post::query();
+        $postQuery = Post::query();
 
         if ($user == null) {
-            $posts = $posts
+            $postQuery = $postQuery
                 ->where('is_published', true);
 
         } elseif ($user->role != 'admin') {
-            $posts = $posts->where('author_id', $user->id)
+            $postQuery = $postQuery->where('author_id', $user->id)
                 ->orWhere('is_published', true);
         }
 
-        return $posts->paginate();
+        return $postQuery->paginate();
     }
 
     /**
      * @inheritDoc
      */
-    public function storePost(array $values)
+    public function storePost(array $values, User $user)
     {
         try {
             DB::beginTransaction();
@@ -53,7 +54,7 @@ class PostRepository implements PostInterface
             $post->title = $values['title'];
             $post->body = $values['body'];
             $post->excerpt = $values['excerpt'];
-            $post->author_id = $values['author_id'];
+            $post->author_id = $user;
             $post->is_published = $values['is_published'];
             $post->photo = $values['photo'];
 
@@ -100,12 +101,17 @@ class PostRepository implements PostInterface
     /**
      * @inheritDoc
      */
-    public function updatePost($id, array $values)
+    public function updatePost($id, array $values, User $user)
     {
         try {
             DB::beginTransaction();
 
             $post = Post::findOrFail($id);
+
+            if ($user->role != 'admin' && $post->author_id != $user->id) {
+                throw new ModelNotFoundException("post doesn't exists or is unreachable");
+            }
+
             $post->title = $values['title'];
             $post->body = $values['body'];
             $post->excerpt = $values['excerpt'];
@@ -115,7 +121,7 @@ class PostRepository implements PostInterface
                 $post->photo = $values['photo'];
             }
 
-            $post->saveOrFail();
+            $post->save();
 
 //                assigning categoryController
             $post->categories()->sync($values['category_ids']);

@@ -4,6 +4,7 @@ namespace App\Interfaces;
 
 use App\Http\Requests\PostRequest;
 use App\Model\Post;
+use App\Model\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\PaginatedResourceResponse;
 
@@ -14,9 +15,10 @@ interface PostInterface
     /**
      * Create new post
      * @param array $values
+     * @param User $user
      * @return Post
      */
-    public function storePost(array $values);
+    public function storePost(array $values, User $user);
 
 
     /**
@@ -42,11 +44,12 @@ interface PostInterface
 
     /**
      *  update a post
-     * @param $id: post id
+     * @param $id : post id
      * @param array $values
+     * @param User $user
      * @return Post
      */
-    public function updatePost($id, array $values);
+    public function updatePost($id, array $values, \App\Model\User $user);
 
     /**
      *  delete a post
